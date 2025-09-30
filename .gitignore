@@ -9,10 +9,8 @@ Backend/venv/
 
 # Backend cache
 Backend/__pycache__/
-
 # Database file
 Backend/*.db
-
 # Secret keys
 Backend/.env
 
