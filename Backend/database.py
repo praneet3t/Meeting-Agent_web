@@ -44,7 +44,6 @@ class TaskUpdate(Base):
     task_id = Column(Integer, ForeignKey("tasks.id"))
     task = relationship("Task", back_populates="updates")
 
-if __name__ == "__main__":
-    print("Creating database and tables...")
+def create_db_and_tables():
+    # This function creates all tables defined in this file.
     Base.metadata.create_all(bind=engine)
-    print("Database tables created successfully.")

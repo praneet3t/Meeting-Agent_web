@@ -5,10 +5,12 @@ function LoginPage({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     try {
       const params = new URLSearchParams();
@@ -20,6 +22,8 @@ function LoginPage({ onLoginSuccess }) {
       onLoginSuccess(response.data.access_token);
     } catch (err) {
       setError('Invalid username or password.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,7 +45,9 @@ function LoginPage({ onLoginSuccess }) {
           placeholder="Password (e.g., pass123)"
           required
         />
-        <button type="submit">Login</button>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? 'Logging in...' : 'Login'}
+        </button>
         {error && <p className="error-message">{error}</p>}
       </form>
     </div>

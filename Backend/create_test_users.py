@@ -28,7 +28,7 @@ def create_users():
     print("\nTest users are ready.")
 
 if __name__ == "__main__":
-    # This function creates the database file and all tables defined in database.py
+    # This function creates the database file and all tables
     print("Initializing database...")
     Base.metadata.create_all(bind=engine)
     print("Database tables are ready.")
