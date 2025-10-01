@@ -1,18 +1,15 @@
 # Frontend dependencies
 Frontend/frontend/node_modules/
-
 # Frontend build folder
 Frontend/frontend/dist/
-
 # Backend virtual environment
 Backend/venv/
-
 # Backend cache
 Backend/__pycache__/
 # Database file
 Backend/*.db
 # Secret keys
 Backend/.env
-
 # General log files
 *.log
+summary.txt
