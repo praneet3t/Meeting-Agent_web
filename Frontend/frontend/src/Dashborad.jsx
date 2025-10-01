@@ -1,15 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-// A small component for the meeting uploader
-function MeetingUploader({ token }) {
+function MeetingUploader({ token, onUploadSuccess }) {
     const [file, setFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
-
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
-    };
 
     const handleUpload = async () => {
         if (!file) {
@@ -26,7 +21,8 @@ function MeetingUploader({ token }) {
             await axios.post('http://127.0.0.1:8000/process-meeting/', formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setMessage('Meeting processed successfully! Your new tasks will appear on refresh.');
+            setMessage('Meeting processed successfully! Refreshing tasks...');
+            onUploadSuccess(); // This will trigger a refresh
         } catch (error) {
             setMessage('Error processing meeting.');
             console.error(error);
@@ -39,7 +35,7 @@ function MeetingUploader({ token }) {
     return (
         <div className="uploader-section">
             <h3>Process a New Meeting</h3>
-            <input type="file" onChange={handleFileChange} accept="audio/*" />
+            <input type="file" onChange={(e) => setFile(e.target.files[0])} accept="audio/*" />
             <button onClick={handleUpload} disabled={isLoading}>
                 {isLoading ? 'Analyzing...' : 'Upload & Analyze'}
             </button>
@@ -48,29 +44,28 @@ function MeetingUploader({ token }) {
     );
 }
 
-
 function Dashboard({ token, onLogout }) {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
 
+  const fetchUserData = async () => {
+    try {
+      const userRes = await axios.get('http://127.0.0.1:8000/users/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser(userRes.data);
+
+      const tasksRes = await axios.get('http://127.0.0.1:8000/users/me/tasks', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTasks(tasksRes.data);
+    } catch (error) {
+      console.error("Failed to fetch user data. Token might be invalid.", error);
+      onLogout();
+    }
+  };
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userRes = await axios.get('http://127.0.0.1:8000/users/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUser(userRes.data);
-
-        const tasksRes = await axios.get('http://127.0.0.1:8000/users/me/tasks', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setTasks(tasksRes.data);
-      } catch (error) {
-        console.error("Failed to fetch user data. Token might be invalid.", error);
-        onLogout(); // Log out if token is invalid
-      }
-    };
-
     fetchUserData();
   }, [token, onLogout]);
 
@@ -80,9 +75,8 @@ function Dashboard({ token, onLogout }) {
         <h1>Welcome, {user ? user.username : '...'}!</h1>
         <button onClick={onLogout}>Logout</button>
       </header>
-
       <main>
-        <MeetingUploader token={token} />
+        <MeetingUploader token={token} onUploadSuccess={fetchUserData} />
         <div className="tasks-section">
           <h2>Your Action Items</h2>
           {tasks.length > 0 ? (
